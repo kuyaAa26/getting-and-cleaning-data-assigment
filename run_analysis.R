@@ -1,97 +1,82 @@
-library(reshape2)
+## This project is based on the Davide Anguita, Alessandro Ghio, Luca Oneto, 
+## Xavier Parra and Jorge L. Reyes-Ortiz publication 
+## "Human Activity Recognition on Smartphones using a Multiclass Hardware-Friendly Support Vector Machine".
+## International Workshop of Ambient Assisted Living (IWAAL 2012). Vitoria-Gasteiz, Spain. Dec 2012
 
-clean.file <- "cleaned.txt"
-extracted.features <- c(1, 2, 3, 4, 5, 6, 41, 42, 43, 44, 45, 46, 81, 82, 83, 84, 85, 86, 121, 122, 123, 124, 125, 126, 161, 162, 163, 164, 165, 166, 201, 202, 214, 215, 227, 228, 240, 241, 253, 254, 266, 267, 268, 269, 270, 271, 345, 346, 347, 348, 349, 350, 424, 425, 426, 427, 428, 429, 503, 504, 516, 517, 529, 530, 542, 543)
-extracted.feature.names <- c("tBodyAcc-mean()-X", "tBodyAcc-mean()-Y", "tBodyAcc-mean()-Z", "tBodyAcc-std()-X", "tBodyAcc-std()-Y", "tBodyAcc-std()-Z", "tGravityAcc-mean()-X", "tGravityAcc-mean()-Y", "tGravityAcc-mean()-Z", "tGravityAcc-std()-X", "tGravityAcc-std()-Y", "tGravityAcc-std()-Z", "tBodyAccJerk-mean()-X", "tBodyAccJerk-mean()-Y", "tBodyAccJerk-mean()-Z", "tBodyAccJerk-std()-X", "tBodyAccJerk-std()-Y", "tBodyAccJerk-std()-Z", "tBodyGyro-mean()-X", "tBodyGyro-mean()-Y", "tBodyGyro-mean()-Z", "tBodyGyro-std()-X", "tBodyGyro-std()-Y", "tBodyGyro-std()-Z", "tBodyGyroJerk-mean()-X", "tBodyGyroJerk-mean()-Y", "tBodyGyroJerk-mean()-Z", "tBodyGyroJerk-std()-X", "tBodyGyroJerk-std()-Y", "tBodyGyroJerk-std()-Z", "tBodyAccMag-mean()", "tBodyAccMag-std()", "tGravityAccMag-mean()", "tGravityAccMag-std()", "tBodyAccJerkMag-mean()", "tBodyAccJerkMag-std()", "tBodyGyroMag-mean()", "tBodyGyroMag-std()", "tBodyGyroJerkMag-mean()", "tBodyGyroJerkMag-std()", "fBodyAcc-mean()-X", "fBodyAcc-mean()-Y", "fBodyAcc-mean()-Z", "fBodyAcc-std()-X", "fBodyAcc-std()-Y", "fBodyAcc-std()-Z", "fBodyAccJerk-mean()-X", "fBodyAccJerk-mean()-Y", "fBodyAccJerk-mean()-Z", "fBodyAccJerk-std()-X", "fBodyAccJerk-std()-Y", "fBodyAccJerk-std()-Z", "fBodyGyro-mean()-X", "fBodyGyro-mean()-Y", "fBodyGyro-mean()-Z", "fBodyGyro-std()-X", "fBodyGyro-std()-Y", "fBodyGyro-std()-Z", "fBodyAccMag-mean()", "fBodyAccMag-std()", "fBodyBodyAccJerkMag-mean()", "fBodyBodyAccJerkMag-std()", "fBodyBodyGyroMag-mean()", "fBodyBodyGyroMag-std()", "fBodyBodyGyroJerkMag-mean()", "fBodyBodyGyroJerkMag-std()")
-activities <- c(1, 2, 3, 4, 5, 6)
-activity.names <- c("WALKING", "WALKING_UPSTAIRS", "WALKING_DOWNSTAIRS", "SITTING", "STANDING", "LAYING")
+## This script merges data from a number of .txt files and produces 
+## a tidy data set which may be used for further analysis.
 
-# A helper method for printing to the console.
-p <- function(...) {
-  cat("[run_analysis.R]", ..., "\n")
+##check for required packages
+if (!("reshape2" %in% rownames(installed.packages())) ) {
+  print("Please install required package \"reshape2\" before proceeding")
+} else {
+        ## Open required libraries
+        library(reshape2)
+
+        ## First, read all required .txt files and label the datasets
+        
+        ## Read all activities and their names and label the aproppriate columns 
+        activity_labels <- read.table("./activity_labels.txt",col.names=c("activity_id","activity_name"))
+
+        ## Read the dataframe's column names
+        features <- read.table("features.txt")
+        feature_names <-  features[,2]
+        
+        ## Read the test data and label the dataframe's columns
+        testdata <- read.table("./test/X_test.txt")
+        colnames(testdata) <- feature_names
+        
+        ## Read the training data and label the dataframe's columns
+        traindata <- read.table("./train/X_train.txt")
+        colnames(traindata) <- feature_names
+        
+        ## Read the ids of the test subjects and label the the dataframe's columns
+        test_subject_id <- read.table("./test/subject_test.txt")
+        colnames(test_subject_id) <- "subject_id"
+        
+        ## Read the activity id's of the test data and label the the dataframe's columns
+        test_activity_id <- read.table("./test/y_test.txt")
+        colnames(test_activity_id) <- "activity_id"
+        
+        ## Read the ids of the test subjects and label the the dataframe's columns
+        train_subject_id <- read.table("./train/subject_train.txt")
+        colnames(train_subject_id) <- "subject_id"
+        
+        ## Read the activity id's of the training data and label 
+        ##the dataframe's columns
+        train_activity_id <- read.table("./train/y_train.txt")
+        colnames(train_activity_id) <- "activity_id"
+        
+        ##Combine the test subject id's, the test activity id's 
+        ##and the test data into one dataframe
+        test_data <- cbind(test_subject_id , test_activity_id , testdata)
+        
+        ##Combine the test subject id's, the test activity id's 
+        ##and the test data into one dataframe
+        train_data <- cbind(train_subject_id , train_activity_id , traindata)
+        
+        ##Combine the test data and the train data into one dataframe
+        all_data <- rbind(train_data,test_data)
+        
+        ##Keep only columns refering to mean() or std() values
+        mean_col_idx <- grep("mean",names(all_data),ignore.case=TRUE)
+        mean_col_names <- names(all_data)[mean_col_idx]
+        std_col_idx <- grep("std",names(all_data),ignore.case=TRUE)
+        std_col_names <- names(all_data)[std_col_idx]
+        meanstddata <-all_data[,c("subject_id","activity_id",mean_col_names,std_col_names)]
+        
+        ##Merge the activities datase with the mean/std values datase 
+        ##to get one dataset with descriptive activity names
+        descrnames <- merge(activity_labels,meanstddata,by.x="activity_id",by.y="activity_id",all=TRUE)
+        
+        ##Melt the dataset with the descriptive activity names for better handling
+        data_melt <- melt(descrnames,id=c("activity_id","activity_name","subject_id"))
+        
+        ##Cast the melted dataset according to  the average of each variable 
+        ##for each activity and each subjec
+        mean_data <- dcast(data_melt,activity_id + activity_name + subject_id ~ variable,mean)
+       
+        ## Create a file with the new tidy dataset
+        write.table(mean_data,"./tidy_movement_data.txt")
+
 }
-
-# Makes a features filename given a dataset name.
-features.file <- function(name) {
-  paste("X_", name, ".txt", sep = "")
-}
-
-# Makes an activities filename given a dataset name.
-activities.file <- function(name) {
-  paste("Y_", name, ".txt", sep = "")
-}
-
-# Makes a subjects filename given a dataset name.
-subjects.file <- function(name) {
-  paste("subject_", name, ".txt", sep = "")
-}
-
-# Returns an interim dataframe for a single dataset.
-get.data <- function(dir, name) {
-  # Setup the file paths.
-  real.dir <- file.path(dir, name)
-  features.name <- file.path(real.dir, features.file(name))
-  activities.name <- file.path(real.dir, activities.file(name))
-  subjects.name <- file.path(real.dir, subjects.file(name))
-
-  p("Getting dataset:", real.dir)
-
-  # Read the features table.
-  p("  reading features...")
-  features.t <- read.table(features.name)[extracted.features]
-  names(features.t) <- extracted.feature.names
-
-  clean.data <- features.t
-
-  # Read the activities list.
-  p("  reading activities...")
-  activities.t <- read.table(activities.name)
-  names(activities.t) <- c("activity")
-  activities.t$activity <- factor(activities.t$activity, levels = activities, labels = activity.names)
-  clean.data <- cbind(clean.data, activity = activities.t$activity)
-
-  # Read the subjects list.
-  p("  reading subjects...")
-  subjects.t <- read.table(subjects.name)
-  names(subjects.t) <- c("subject")
-  clean.data <- cbind(clean.data, subject = subjects.t$subject)
-
-  # Return the clean data
-  clean.data
-}
-
-# Performs the full analysis of both the test and train
-# datasets. Writes a clean dataset to disk.
-run.analysis <- function(dir) {
-  p("Getting and Cleaning Data Project")
-  p("Author: William Bowers")
-  p("---")
-  p("Starting up.")
-  p("Preparing to run analysis.")
-
-  # Read the data.
-  p("Reading datasets.")
-  test <- get.data(dir, "test")
-  train <- get.data(dir, "train")
-
-  # Join the data.
-  p("Joining datasets.")
-  all.data <- rbind(test, train)
-
-  # Reshape the data.
-  p("Melting.")
-  all.data.long <- melt(all.data, id = c("subject", "activity"))
-  p("Dcasting.")
-  all.data.wide <- dcast(all.data.long, subject + activity ~ variable, mean)
-
-  # Set the clean data.
-  all.data.clean <- all.data.wide
-
-  # Save the clean data.
-  clean.file.name <- file.path(dir, clean.file)
-  p("Saving clean data to:", clean.file.name)
-  write.table(all.data.clean, clean.file.name, row.names = FALSE, quote = FALSE)
-}
-
-# Run the analysis.
-run.analysis("/repos/Getting-and-Cleaning-Data-Project/data")

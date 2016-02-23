@@ -1,59 +1,71 @@
-# Getting and Cleaning Data Project
+==============================================================
+Run_Analysis.R R-script 
+on
+Human Activity Recognition Using Smartphones Dataset
+Version 1.0
+==============================================================
+by Themos Patrikios
+==============================================================
 
-## run_analysis.R
+The run_analysis.R script reads data from the "Human Activity Recognition Using Smartphones Dataset Version 1.0" and produces a new - tidy - dataset which may be used for further analysis.
 
-The cleanup script (run_analysis.R) does the following:
+The data in the "Human Activity Recognition Using Smartphones Dataset Version 1.0" have been taken from experiments carried out with a group of 30 volunteers within an age bracket of 19-48 years. Each person performed six activities (WALKING, WALKING_UPSTAIRS, WALKING_DOWNSTAIRS, SITTING, STANDING, LAYING) wearing a smartphone (Samsung Galaxy S II) on the waist. Using its embedded accelerometer and gyroscope, 3-axial linear acceleration and 3-axial angular velocity at a constant rate of 50Hz data were captured. The experiments were video-recorded to label the data manually. The obtained dataset was randomly partitioned into two sets, where 70% of the volunteers was selected for generating the training data and 30% the test data. 
 
-1. Merges the training and the test sets to create one data set.
-2. Extracts only the measurements on the mean and standard deviation for each measurement. 
-3. Uses descriptive activity names to name the activities in the data set
-4. Appropriately labels the data set with descriptive activity names. 
-5. Creates a second, independent tidy data set with the average of each variable for each activity and each subject. 
 
-## Running the script
+The original dataset included the following data files:
+=======================================================
+- 'features.txt': List of all features.
 
-To run the script, source `run_analysis.R`. After running, you will see the following output as the script works:
+- 'activity_labels.txt': List of class labels and their activity name.
 
-```
-[run_analysis.R] Getting and Cleaning Data Project 
-[run_analysis.R] Author: William Bowers 
-[run_analysis.R] --- 
-[run_analysis.R] Starting up. 
-[run_analysis.R] Preparing to run analysis. 
-[run_analysis.R] Reading datasets. 
-[run_analysis.R] Getting dataset: /repos/Getting-and-Cleaning-Data-Project/data/test 
-[run_analysis.R]   reading features... 
-[run_analysis.R]   reading activities... 
-[run_analysis.R]   reading subjects... 
-[run_analysis.R] Getting dataset: /repos/Getting-and-Cleaning-Data-Project/data/train 
-[run_analysis.R]   reading features... 
-[run_analysis.R]   reading activities... 
-[run_analysis.R]   reading subjects... 
-[run_analysis.R] Joining datasets. 
-[run_analysis.R] Melting. 
-[run_analysis.R] Dcasting. 
-[run_analysis.R] Saving clean data to: /repos/Getting-and-Cleaning-Data-Project/data/cleaned.txt 
-```
+- 'train/X_train.txt': Training set.
 
-## Process
+- 'train/y_train.txt': Training labels.
 
-1. For both the test and train datasets, produce an interim dataset:
-    1. Extract the mean and standard deviation features (listed in CodeBook.md, section 'Extracted Features'). This is the `values` table.
-    2. Get the list of activities.
-    3. Put the activity *labels* (not numbers) into the `values` table.
-    4. Get the list of subjects.
-    5. Put the subject IDs into the `values` table.
-2. Join the test and train interim datasets.
-3. Put each variable on its own row.
-4. Rejoin the entire table, keying on subject/acitivity pairs, applying the mean function to each vector of values in each subject/activity pair. This is the clean dataset.
-5. Write the clean dataset to disk.
+- 'train/subject_train.txt': ID's of subjects in the training data
 
-## Cleaned Data
+- 'test/X_test.txt': Test set.
 
-The resulting clean dataset is in this repository at: `data/cleaned.txt`. It contains one row for each subject/activity pair and columns for subject, activity, and each feature that was a mean or standard deviation from the original dataset.
+- 'test/y_test.txt': Test labels.
 
-## Notes
+- 'test/subject_test.txt': ID's of subjects in the training data
 
-X_* - feature values (one row of 561 features for a single activity)
-Y_* - activity identifiers (for each row in X_*)
-subject_* - subject identifiers for rows in X_*
+For more information about the "Human Activity Recognition Using Smartphones Dataset Version 1.0" contact: activityrecognition@smartlab.ws
+
+
+A brief description of the script:
+==================================
+The run_analysis.R script merges data from a number of .txt files and produces a tidy data set which may be used for further analysis.
+
+- First it checks to see if the required "reshape2" has been installed and then loads the "reshape2" package.
+
+- It then reads all required .txt files and labels the datasets
+
+- Consquently the appropriate "activity_id"'s and "subject_id"'s are appended to the "test" and the "training" data, which are then combined into one single data frame
+
+- Using the "grep" function, all the columns with mean() and std() values are extracted and then a new data frame, including only the "activity_id", the "subject_id" and the mean() and std() columns, is created    
+
+- Using the "merge" function, descriptive activity names are merged with the mean/std values dataset, to get one dataset with descriptive activity names
+
+- Lastly, with the help of the "melt" and "dcast" functions of the "reshape2" package, the data is converted into a table containing mean values of all the included features, ordered by the activity name and the subject id, and the data is written to the "tidy_movement_data.txt" file.
+
+A description of the "tidy_movement_data.txt" file may be found in the "CodeBook.md" file. 
+
+
+Acknowledgements:
+=================
+Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. Human Activity Recognition on Smartphones using a Multiclass Hardware-Friendly Support Vector Machine. International Workshop of Ambient Assisted Living (IWAAL 2012). Vitoria-Gasteiz, Spain. Dec 2012
+
+
+License:
+========
+Use of the Run_Analysis.R script is free for all users.
+
+Use of the resulting dataset "tidy_movement_data.txt" in publications must be acknowledged by referencing the following publication [1] 
+
+[1] Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. Human Activity Recognition on Smartphones using a Multiclass Hardware-Friendly Support Vector Machine. International Workshop of Ambient Assisted Living (IWAAL 2012). Vitoria-Gasteiz, Spain. Dec 2012
+
+This dataset is distributed AS-IS and no responsibility implied or explicit can be addressed to the author for its use or misuse. Any commercial use is prohibited.
+
+============================
+Themos Patrikios, April 2014
